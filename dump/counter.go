@@ -127,7 +127,8 @@ func (c *Counter) count(e *decoder.Entry) {
 	c.countLargestEntries(e, 500)
 	c.countByType(e)
 	c.countByLength(e)
-	c.countByKeyPrefix(e)
+	//c.countByKeyPrefix(e)
+	c.countByKeyPrefixDistinct(e)
 	c.countBySlot(e)
 }
 
@@ -183,6 +184,39 @@ func (c *Counter) countByKeyPrefix(e *decoder.Entry) {
 		return c
 	}, e.Key)
 	prefixes := getPrefixes(k, c.separators)
+	key := typeKey{
+		Type: e.Type,
+	}
+	for _, prefix := range prefixes {
+		if len(prefix) == 0 {
+			continue
+		}
+		key.Key = prefix
+		c.keyPrefixBytes[key] += e.Bytes
+		c.keyPrefixNum[key]++
+	}
+}
+
+func (c *Counter) countByKeyPrefixDistinct(e *decoder.Entry) {
+	k := ""
+	var buf []rune
+	for _, c := range e.Key {
+		if c >= 48 && c <= 57 { //48 == "0" 57 == "9"
+			buf = append(buf, '0')
+		} else {
+			if len(buf) > 0 {
+				k += "000"
+			}
+			k += string(c)
+			buf = buf[:0]
+		}
+	}
+	if len(buf) > 0 {
+		k += "000"
+	}
+
+	prefixes := getPrefixes(k, c.separators)
+	prefixes = append(prefixes, k)
 	key := typeKey{
 		Type: e.Type,
 	}
