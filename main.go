@@ -21,29 +21,11 @@ import (
 
 	"fmt"
 
-	"github.com/xueqiu/rdr/decoder"
 	"github.com/xueqiu/rdr/dump"
 )
 
 //go:generate go-bindata -prefix "static/" -o=static/static.go -pkg=static -ignore static.go static/...
 //go:generate go-bindata -prefix "views/" -o=views/views.go -pkg=views -ignore views.go views/...
-
-// keys is function for command `keys`
-// output all keys in rdbfile(s) get from args
-func keys(c *cli.Context) {
-	if c.NArg() < 1 {
-		fmt.Fprintln(c.App.ErrWriter, "keys requires at least 1 argument")
-		cli.ShowCommandHelp(c, "keys")
-		return
-	}
-	for _, filepath := range c.Args() {
-		decoder := decoder.NewDecoder()
-		go dump.Decode(c, decoder, filepath)
-		for e := range decoder.Entries {
-			fmt.Fprintf(c.App.Writer, "%v\n", e.Key)
-		}
-	}
-}
 
 func main() {
 	app := cli.NewApp()
@@ -76,12 +58,18 @@ func main() {
 			Name:      "keys",
 			Usage:     "get all keys from rdbfile",
 			ArgsUsage: "FILE1 [FILE2] [FILE3]...",
-			Action:    keys,
+			Action:    dump.Keys,
+		},
+		cli.Command{
+			Name:      "hash-fields",
+			Usage:     "get hash keys all field from rdbfile",
+			ArgsUsage: "hash-key regexp pattern  FILE1 [FILE2] [FILE3]...",
+			Action:    dump.HashFields,
 		},
 	}
 	app.CommandNotFound = func(c *cli.Context, command string) {
-		fmt.Fprintf(c.App.ErrWriter, "command %q can not be found.\n", command)
-		cli.ShowAppHelp(c)
+		_, _ = fmt.Fprintf(c.App.ErrWriter, "command %q can not be found.\n", command)
+		_ = cli.ShowAppHelp(c)
 	}
-	app.Run(os.Args)
+	_ = app.Run(os.Args)
 }

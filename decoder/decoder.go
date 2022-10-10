@@ -16,11 +16,10 @@ package decoder
 
 import (
 	"fmt"
-	"os"
-	"strconv"
-
 	"github.com/dongmx/rdb"
 	"github.com/dongmx/rdb/nopdecoder"
+	"os"
+	"strconv"
 )
 
 // Entry is info of a redis recored
@@ -31,6 +30,7 @@ type Entry struct {
 	NumOfElem          uint64
 	LenOfLargestElem   uint64
 	FieldOfLargestElem string
+	HashMembers        []string
 }
 
 // Decoder decode rdb file
@@ -41,7 +41,7 @@ type Decoder struct {
 	usedMem int64
 	ctime   int64
 	count   int
-	rdbVer int
+	rdbVer  int
 
 	currentInfo  *rdb.Info
 	currentEntry *Entry
@@ -194,6 +194,8 @@ func (d *Decoder) Hset(key, field, value []byte) {
 			e.Bytes += 2 * d.m.RobjOverhead()
 		}
 	}
+
+	e.HashMembers = append(e.HashMembers, string(field))
 }
 
 // EndHash is called when there are no more fields in a hash.

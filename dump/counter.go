@@ -16,6 +16,7 @@ package dump
 
 import (
 	"container/heap"
+	"github.com/xueqiu/rdr/utils"
 	"sort"
 	"strconv"
 	"strings"
@@ -94,7 +95,7 @@ func (c *Counter) GetLargestEntries(num int) []*decoder.Entry {
 	return res
 }
 
-//GetLargestKeyPrefixes from heap
+// GetLargestKeyPrefixes from heap
 func (c *Counter) GetLargestKeyPrefixes() []*PrefixEntry {
 	res := []*PrefixEntry{}
 
@@ -198,23 +199,7 @@ func (c *Counter) countByKeyPrefix(e *decoder.Entry) {
 }
 
 func (c *Counter) countByKeyPrefixDistinct(e *decoder.Entry) {
-	k := ""
-	var buf []rune
-	for _, c := range e.Key {
-		if c >= 48 && c <= 57 { //48 == "0" 57 == "9"
-			buf = append(buf, '0')
-		} else {
-			if len(buf) > 0 {
-				k += "000"
-			}
-			k += string(c)
-			buf = buf[:0]
-		}
-	}
-	if len(buf) > 0 {
-		k += "000"
-	}
-
+	k := utils.KeyPrefixDistinct(e.Key)
 	prefixes := getPrefixes(k, c.separators)
 	prefixes = append(prefixes, k)
 	key := typeKey{
