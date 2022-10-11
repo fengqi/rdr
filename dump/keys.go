@@ -17,9 +17,13 @@ func Keys(c *cli.Context) {
 	for _, filepath := range c.Args() {
 		keyDecoder := decoder.NewDecoder()
 		go Decode(c, keyDecoder, filepath)
-		fmt.Println("key,bytes,type,num_of_elem,len_of_large_elem")
+		fmt.Println("database,type,key,size_in_bytes,encoding,num_elements,len_largest_element,expiry")
 		for e := range keyDecoder.Entries {
-			fmt.Printf("%s,%d,%s,%d,%d\n", e.Key, e.Bytes, e.Type, e.NumOfElem, e.LenOfLargestElem)
+			if e.Expiry.IsZero() {
+				fmt.Printf("%d,%s,%s,%d,%s,%d,%d,%s\n", e.Db, e.Type, e.Key, e.Bytes, e.Encoding, e.NumOfElem, e.LenOfLargestElem, "")
+			} else {
+				fmt.Printf("%d,%s,%s,%d,%s,%d,%d,%s\n", e.Db, e.Type, e.Key, e.Bytes, e.Encoding, e.NumOfElem, e.LenOfLargestElem, e.Expiry)
+			}
 		}
 	}
 }

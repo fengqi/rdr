@@ -18,8 +18,10 @@ import (
 	"fmt"
 	"github.com/dongmx/rdb"
 	"github.com/dongmx/rdb/nopdecoder"
+	"github.com/xueqiu/rdr/utils"
 	"os"
 	"strconv"
+	"time"
 )
 
 // Entry is info of a redis recored
@@ -31,6 +33,9 @@ type Entry struct {
 	LenOfLargestElem   uint64
 	FieldOfLargestElem string
 	HashMembers        []string
+	Db                 int
+	Encoding           string
+	Expiry             time.Time
 }
 
 // Decoder decode rdb file
@@ -42,6 +47,7 @@ type Decoder struct {
 	ctime   int64
 	count   int
 	rdbVer  int
+	db      int
 
 	currentInfo  *rdb.Info
 	currentEntry *Entry
@@ -72,6 +78,10 @@ func (d *Decoder) GetUsedMem() int64 {
 
 func (d *Decoder) StartRDB(ver int) {
 	d.rdbVer = ver
+}
+
+func (d *Decoder) StartDatabase(n int) {
+	d.db = n
 }
 
 func (d *Decoder) Aux(key, value []byte) {
@@ -110,6 +120,9 @@ func (d *Decoder) StartStream(key []byte, cardinality, expiry int64, info *rdb.I
 		Type:             "stream",
 		NumOfElem:        0,
 		LenOfLargestElem: 0,
+		Db:               d.db,
+		Encoding:         info.Encoding,
+		Expiry:           utils.TimestampToTime(expiry),
 	}
 }
 
@@ -147,6 +160,9 @@ func (d *Decoder) Set(key, value []byte, expiry int64, info *rdb.Info) {
 		Bytes:     bytes,
 		Type:      "string",
 		NumOfElem: d.m.ElemLen(value),
+		Db:        d.db,
+		Encoding:  info.Encoding,
+		Expiry:    utils.TimestampToTime(expiry),
 	}
 	d.Entries <- e
 }
@@ -172,6 +188,9 @@ func (d *Decoder) StartHash(key []byte, length, expiry int64, info *rdb.Info) {
 		Bytes:     bytes,
 		Type:      "hash",
 		NumOfElem: uint64(length),
+		Db:        d.db,
+		Encoding:  info.Encoding,
+		Expiry:    utils.TimestampToTime(expiry),
 	}
 }
 
@@ -250,6 +269,9 @@ func (d *Decoder) StartList(key []byte, length, expiry int64, info *rdb.Info) {
 		Bytes:     bytes,
 		Type:      "list",
 		NumOfElem: 0,
+		Db:        d.db,
+		Encoding:  info.Encoding,
+		Expiry:    utils.TimestampToTime(expiry),
 	}
 }
 
@@ -333,6 +355,9 @@ func (d *Decoder) StartZSet(key []byte, cardinality, expiry int64, info *rdb.Inf
 		Bytes:     bytes,
 		Type:      "sortedset",
 		NumOfElem: uint64(cardinality),
+		Db:        d.db,
+		Encoding:  info.Encoding,
+		Expiry:    utils.TimestampToTime(expiry),
 	}
 }
 
