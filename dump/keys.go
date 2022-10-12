@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/urfave/cli"
 	"github.com/xueqiu/rdr/decoder"
+	"os"
 	"time"
 )
 
@@ -19,6 +20,10 @@ func Keys(c *cli.Context) {
 	noExpire := c.Bool("no-expire")
 
 	for _, filepath := range c.Args() {
+		if _, err := os.Lstat(filepath); err != nil {
+			continue
+		}
+
 		keyDecoder := decoder.NewDecoder()
 		go Decode(c, keyDecoder, filepath)
 		fmt.Println("database,type,key,size_in_bytes,encoding,num_elements,len_largest_element,expiry")
