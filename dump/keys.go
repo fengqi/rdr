@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/urfave/cli"
 	"github.com/xueqiu/rdr/decoder"
+	"time"
 )
 
 // Keys is function for command `keys`
@@ -14,6 +15,9 @@ func Keys(c *cli.Context) {
 		_ = cli.ShowCommandHelp(c, "keys")
 		return
 	}
+
+	noExpire := c.Bool("no-expire")
+
 	for _, filepath := range c.Args() {
 		keyDecoder := decoder.NewDecoder()
 		go Decode(c, keyDecoder, filepath)
@@ -22,6 +26,9 @@ func Keys(c *cli.Context) {
 			if e.Expiry.IsZero() {
 				fmt.Printf("%d,%s,%s,%d,%s,%d,%d,%s\n", e.Db, e.Type, e.Key, e.Bytes, e.Encoding, e.NumOfElem, e.LenOfLargestElem, "")
 			} else {
+				if noExpire && time.Now().After(e.Expiry) {
+					continue
+				}
 				fmt.Printf("%d,%s,%s,%d,%s,%d,%d,%s\n", e.Db, e.Type, e.Key, e.Bytes, e.Encoding, e.NumOfElem, e.LenOfLargestElem, e.Expiry)
 			}
 		}

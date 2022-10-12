@@ -69,6 +69,12 @@ func main() {
 			Usage:     "get all keys from rdbfile",
 			ArgsUsage: "FILE1 [FILE2] [FILE3]...",
 			Action:    dump.Keys,
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "no-expire, x",
+					Usage: "remove expiry from all keys (default: false)",
+				},
+			},
 		},
 		cli.Command{
 			Name:      "hash-fields",
