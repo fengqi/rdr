@@ -63,7 +63,7 @@ func Show(c *cli.Context) {
 						fmt.Fprintf(c.App.Writer, "start to parse %v \n", filename)
 						go Decode(c, decoder, v)
 						counter := NewCounter()
-						counter.Count(decoder.Entries)
+						counter.Count(decoder.Entries, c.Bool("no-expire"))
 						counters.Set(filename, counter)
 						fmt.Fprintf(c.App.Writer, "parse %v  done\n", filename)
 

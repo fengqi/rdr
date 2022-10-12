@@ -40,6 +40,12 @@ func main() {
 			Usage:     "dump statistical information of rdbfile to STDOUT",
 			ArgsUsage: "FILE1 [FILE2] [FILE3]...",
 			Action:    dump.ToCliWriter,
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "no-expire, x",
+					Usage: "remove expiry from all keys (default: false)",
+				},
+			},
 		},
 		cli.Command{
 			Name:      "show",
@@ -50,6 +56,10 @@ func main() {
 					Name:  "port, p",
 					Value: 8080,
 					Usage: "Port for rdr to listen",
+				},
+				cli.BoolFlag{
+					Name:  "no-expire, x",
+					Usage: "remove expiry from all keys (default: false)",
 				},
 			},
 			Action: dump.Show,

@@ -13,7 +13,7 @@ import (
 )
 
 // Dump rdb file statistical information
-func Dump(path string) (map[string]interface{}, error) {
+func Dump(path string, noExpire bool) (map[string]interface{}, error) {
 	var data map[string]interface{}
 	decoder := decoder.NewDecoder()
 	go func() {
@@ -30,7 +30,7 @@ func Dump(path string) (map[string]interface{}, error) {
 		}
 	}()
 	cnt := NewCounter()
-	cnt.Count(decoder.Entries)
+	cnt.Count(decoder.Entries, noExpire)
 	filename := filepath.Base(path)
 	data = getData(filename, cnt)
 	return data, nil
@@ -51,7 +51,7 @@ func ToCliWriter(cli *cli.Context) {
 		decoder := decoder.NewDecoder()
 		go Decode(cli, decoder, file)
 		cnt := NewCounter()
-		cnt.Count(decoder.Entries)
+		cnt.Count(decoder.Entries, cli.Bool("no-expire"))
 		filename := filepath.Base(file)
 		data := getData(filename, cnt)
 		data["MemoryUse"] = decoder.GetUsedMem()

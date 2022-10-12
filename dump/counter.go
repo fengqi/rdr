@@ -20,6 +20,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/xueqiu/rdr/decoder"
 )
@@ -71,8 +72,11 @@ type Counter struct {
 }
 
 // Count by various dimensions
-func (c *Counter) Count(in <-chan *decoder.Entry) {
+func (c *Counter) Count(in <-chan *decoder.Entry, noExpire bool) {
 	for e := range in {
+		if noExpire && !e.Expiry.IsZero() && time.Now().After(e.Expiry) {
+			continue
+		}
 		c.count(e)
 	}
 	// get largest prefixes
