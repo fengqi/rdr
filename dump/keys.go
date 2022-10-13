@@ -31,7 +31,7 @@ func Keys(c *cli.Context) {
 			if e.Expiry.IsZero() {
 				fmt.Printf("%d,%s,%s,%d,%s,%d,%d,%s\n", e.Db, e.Type, e.Key, e.Bytes, e.Encoding, e.NumOfElem, e.LenOfLargestElem, "")
 			} else {
-				if noExpire && time.Now().After(e.Expiry) {
+				if noExpire && !e.Expiry.IsZero() && time.Now().After(e.Expiry) {
 					continue
 				}
 				fmt.Printf("%d,%s,%s,%d,%s,%d,%d,%s\n", e.Db, e.Type, e.Key, e.Bytes, e.Encoding, e.NumOfElem, e.LenOfLargestElem, e.Expiry)

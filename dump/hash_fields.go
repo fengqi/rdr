@@ -5,8 +5,10 @@ import (
 	"github.com/urfave/cli"
 	"github.com/xueqiu/rdr/decoder"
 	"github.com/xueqiu/rdr/utils"
+	"os"
 	"regexp"
 	"sync"
+	"time"
 )
 
 // HashFields 统计 hash 字段出现的次数
@@ -24,14 +26,24 @@ func HashFields(c *cli.Context) {
 		return
 	}
 
+	noExpire := c.Bool("no-expire")
+
 	wg := sync.WaitGroup{}
 	wg.Add(c.NArg() - 1)
 	counter := make(map[string]int, 0)
 	keys := make(map[string]int, 0)
 	for _, file := range args[1:] {
+		if _, err := os.Lstat(file); err != nil {
+			continue
+		}
+
 		rdbDecoder := decoder.NewDecoder()
 		go Decode(c, rdbDecoder, file)
 		for e := range rdbDecoder.Entries {
+			if noExpire && !e.Expiry.IsZero() && time.Now().After(e.Expiry) {
+				continue
+			}
+
 			if e.Type == "hash" {
 				if compile.MatchString(e.Key) {
 					keys[utils.KeyPrefixDistinct(e.Key)] += 1

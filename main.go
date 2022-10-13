@@ -81,6 +81,12 @@ func main() {
 			Usage:     "get hash keys all field from rdbfile",
 			ArgsUsage: "hash-key regexp pattern  FILE1 [FILE2] [FILE3]...",
 			Action:    dump.HashFields,
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "no-expire, x",
+					Usage: "remove expiry from all keys (default: false)",
+				},
+			},
 		},
 	}
 	app.CommandNotFound = func(c *cli.Context, command string) {
