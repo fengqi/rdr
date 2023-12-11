@@ -16,8 +16,8 @@ package decoder
 
 import (
 	"fmt"
-	"github.com/dongmx/rdb"
-	"github.com/dongmx/rdb/nopdecoder"
+	"github.com/fengqi/rdb"
+	"github.com/fengqi/rdb/nopdecoder"
 	"github.com/xueqiu/rdr/utils"
 	"os"
 	"strconv"

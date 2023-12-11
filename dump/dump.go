@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dongmx/rdb"
+	"github.com/fengqi/rdb"
 	"github.com/urfave/cli"
 	"github.com/xueqiu/rdr/decoder"
 )
