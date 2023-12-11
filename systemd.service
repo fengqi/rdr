@@ -1,0 +1,17 @@
+[Unit]
+Description=redis data reveal
+After=network.target nss-lookup.target
+
+[Service]
+Type=simple
+KillMode=process
+LimitAS=infinity
+LimitRSS=infinity
+LimitCORE=infinity
+LimitNOFILE=65536
+WorkingDirectory=/data/bigkeys
+ExecStart=/usr/local/bin/rdr-linux show -p 7070 -x true /data/bigkeys/
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
